@@ -8,7 +8,6 @@
 
 ## Table of Contents
 
-- [Table of Contents](#table-of-contents)
 - [Overview](#overview)
   - [What is Falcon Data Replicator](#what-is-falcon-data-replicator)
   - [What is Amazon Security Lake](#what-is-amazon-security-lake)
@@ -98,7 +97,7 @@ In this step, you'll run a script that will read the output of the CloudFormatio
 In this step, you'll configure and run a script that reads files written to your FDR bucket, transforms it to OSFC schema, and loads it into Amazon Security Lake.
 
 1. Clone the [FDR application](https://github.com/CrowdStrike/FDR) project from GitHub to your machine
-1. Place the mapping files you obtained from your account manager into the `/mappings` directory of your project
+1. Place the mapping files you obtained from your account manager into the `./ocsf/mappings` directory of your project
 1. Open `falcon_data_replicator.ini` in a text editor and provide CrowdStrike FDR and Amazon Security Lake S3 details:
    1. Under `[Source]`:
       1. `AWS_KEY`={{ Replace with value from step 1 }}
@@ -110,8 +109,8 @@ In this step, you'll configure and run a script that reads files written to your
          1. If your CID is in `eu-1`, then replace with `eu-central-1`
    1. Under `[Destination]`:
       1. `TARGET_ACCOUNT_ID`={{ Replace with AWS Security Lake account ID }}
-      1. `TARGET_BUCKET`={{ Replace with value you received from }}
-      1. `TARGET_REGION`={{ Replace with value you received from }}
+      1. `TARGET_BUCKET`={{ Replace with value you received from Amazon Security Lake }}
+      1. `TARGET_REGION`={{ Replace with value you received from Amazon Security Lake }}
       1. `DO_OCSF_CONVERSION`=yes
 1. Run the application in the same account where your Amazon Security Lake master is configured by issuing the following command: `python falcon_data_replicator.py`
 
