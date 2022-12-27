@@ -78,19 +78,15 @@ In this step, you'll set up the required resources for CrowdStrike to be registe
 
 #### 2.1 Deploy IAM Roles
 
-In this step, you'll deploy the IAM roles required for AWS services to communicate with Amazon Security Lake.
+Please follow AWS's guidance on creating an IAM role that allows Security Lake to interact with custom sources: [Prerequisite: Create IAM role before adding custom sources](https://docs.aws.amazon.com/security-lake/latest/userguide/custom-sources.html). If you've already created the IAM role, record the ARN as you'll need it for the next step
 
-1. Navigate to AWS CloudFormation in your AWS console and deploy a new stack
-1. Choose `Upload file` and select the following CloudFormation template from this project: `./infrastructure/cft_deploy_iam_roles.json`
-1. Assign the following values for the parameters:
-   1. **accountId:** Number of the AWS account ID where Amazon Security Lake is deployed, account ID where you're deploying the stack by default
-   1. **customSource:** Name of the custom resource, CrowdStrike by default
 
 #### 2.2 Register CrowdStrike as custom source provider
 
-In this step, you'll run a script that will read the output of the CloudFormation stack you deployed previously and register CrowdStrike and the supported custom sources with Amazon Security Lake.
+In this step, you'll run a script that will register CrowdStrike sources for each supported OCSF Event Class with Amazon Security Lake.
 
 1. From the root of this project's directory, run the following script: `sh ./infrastructure/create_crowdstrike_sources.sh`
+   1. When prompted for the `ARN of IAM Role that has permissions to Invoke Glue`, use the ARN from 2.1
 
 ### 3. Configuring and running the Falcon Data Replicator application
 
