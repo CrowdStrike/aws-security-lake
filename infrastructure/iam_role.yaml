@@ -11,6 +11,9 @@ Parameters:
     Type: String
     Description: The external ID to be used for the IAM role.
     Default: CrowdStrikeCustomSource
+  AccountId:
+    Type: String
+    Description: The AWS account ID where FDR github tool is deployed.
 Resources:
   IAMRole:
     Type: 'AWS::IAM::Role'
@@ -22,7 +25,7 @@ Resources:
           - Sid: '1'
             Effect: Allow
             Principal:
-              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+              AWS: !Sub 'arn:aws:iam::${AccountId}:root'
             Action: 'sts:AssumeRole'
             Condition:
               StringEquals:

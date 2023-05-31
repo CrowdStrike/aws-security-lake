@@ -72,8 +72,9 @@ fi
 read -p "[?] ARN of IAM Role that has permissions to Invoke Glue: " GLI_ARN
 
 echo "[!] Checking to see if at least one source is enabled..."
-SOURCES=$(aws securitylake get-datalake-status)
-NUM_SOURCES=$(echo $SOURCES | jq -r '.accountSourcesList | length')
+SOURCES=$(aws securitylake get-data-lake-sources)
+
+NUM_SOURCES=$(echo $SOURCES | jq -r '.dataLakeSources | length')
 if [ "$NUM_SOURCES" == "0" ] || [ "$NUM_SOURCES" == "" ] ; then
     echo "[X] You haven't setup at least one Amazon Security Lake source yet, please do that first"
     exit 1
@@ -90,7 +91,7 @@ for klass in ${SUPPORTED_OCSF_CLASSES[@]}; do
     #
     # This is calculated by looking at all the sources for a given AWS account and
     # match the sourceType to ours and then ensure they're in our target account (defined by the user)
-    SOURCE_ACCOUNT_ID=$(echo $SOURCES | jq --arg AWS_SOURCE_TYPE "${aws_source_type}" -e -r '.accountSourcesList[] | select(.sourceType==$AWS_SOURCE_TYPE).account')
+    SOURCE_ACCOUNT_ID=$(echo $SOURCES | jq --arg AWS_SOURCE_TYPE "${aws_source_type}" -e -r '.dataLakeSources[] | select(.sourceType==$AWS_SOURCE_TYPE).account')
 
     if [ "$SOURCE_ACCOUNT_ID" == "$ACCOUNT_ID" ]; then
         echo "[!] ${source_name} already exists, skipping..."
@@ -98,19 +99,19 @@ for klass in ${SUPPORTED_OCSF_CLASSES[@]}; do
     fi
 
     echo "[+] Creating ${source_name}..."
-    aws securitylake create-custom-log-source  \
-        --custom-source-name ${source_name} \
-        --event-class ${klass} \
-        --glue-invocation-role-arn  ${GLI_ARN} \
-        --log-provider-account-id ${ACCOUNT_ID} \
+    aws securitylake create-custom-log-source \
+        --configuration "{\"crawlerConfiguration\":{\"roleArn\":\"$GLI_ARN\"},\"providerIdentity\":{\"externalId\":\"$CFT_EXTERNALID\",\"principal\":\"$ACCOUNT_ID\"}}" \
+        --event-classes "[\"$klass\"]" \
+        --source-name ${source_name} \
         --region ${SECURITY_LAKE_REGION}
 done
 
 aws cloudformation create-stack \
-    --stack-name ${ROLE_NAME} \
+    --stack-name ${CFT_ROLE_NAME} \
     --template-body file://infrastructure/iam_role.yaml \
     --capabilities CAPABILITY_NAMED_IAM \
-    --parameters ParameterKey=ExternalId,ParameterValue=${EXTERNALID} \
-                 ParameterKey=BucketName,ParameterValue=${BUCKET_NAME} \
-                 ParameterKey=RoleName,ParameterValue=${ROLE_NAME} \
+    --parameters ParameterKey=ExternalId,ParameterValue=${CFT_EXTERNALID} \
+                 ParameterKey=BucketName,ParameterValue=${CFT_BUCKET_NAME} \
+                 ParameterKey=RoleName,ParameterValue=${CFT_ROLE_NAME} \
+                 ParameterKey=AccountId,ParameterValue=${ACCOUNT_ID} \
     --region ${SECURITY_LAKE_REGION}

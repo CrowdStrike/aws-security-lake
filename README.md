@@ -54,6 +54,7 @@ While FDR data encompasses a large amount of events, only certain events are app
 
 ### Prerequisites
 
+- AWS CLI version greater than `2.11.24`
 - You must be a customer of CrowdStrike Insights XDR and Falcon Data Replicator
 - Contact your CrowdStrike account manager to obtain the FDR OCSF mapping files
 - Contact your CrowdStrike account manager to start using FDR
