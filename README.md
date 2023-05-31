@@ -92,7 +92,7 @@ This script will also create a IAM role that will be used later to write data to
 
 1. From the root of this project's directory, run the following script: `sh ./infrastructure/create_crowdstrike_sources.sh`
    1. When prompted for the `ARN of IAM Role that has permissions to Invoke Glue`, use the ARN from 2.1
-   2. When prompted for the `S3 Bucket name to write source to` use the name of the security lake bucket you received from Amazon Security Lake. Use the bucket for the region you are writing to. The name can be found by going to `Security Lake > Regions` and clicking on the `location` for your target region. This will take you to the bucket's page where you can copy the name.
+   1. When prompted for the `S3 Bucket name to write source to` use the name of the security lake bucket you received from Amazon Security Lake. Use the bucket for the region you are writing to. The name can be found by going to `Security Lake > Regions` and clicking on the `location` for your target region. This will take you to the bucket's page where you can copy the name.
 
 ### 3. Configuring and running the Falcon Data Replicator application
 
@@ -114,9 +114,9 @@ In this step, you'll configure and run a script that reads files written to your
       1. `TARGET_BUCKET`={{ Replace with value you received from Amazon Security Lake }}
       1. `TARGET_REGION`={{ Replace with value you received from Amazon Security Lake }}
       1. `DO_OCSF_CONVERSION`=yes
-      1. `OCSF_ASSUME_ROLE_ARN`={{ Replace with ARN created from the CFT in step 2.2 }}
-      1. `OCSF_EXTERNAL_ID`={{ Replace with value from step 2.2. Default is `CrowdStrikeCustomSource` }} 
-2. Run the application in the same account where your Amazon Security Lake master is configured by issuing the following command: `python falcon_data_replicator.py`
+      1. `OCSF_ROLE_NAME`={{ Replace with name of the role created from the CFT in step 2.2. Default is `CrowdStrike-AmazonSecurityLake-CustomSourceRole` }}
+      1. `OCSF_ROLE_EXTERNAL_ID`={{ Replace with value from step 2.2. Default is `CrowdStrikeCustomSource` }}
+1. Run the application in the same account where your Amazon Security Lake master is configured by issuing the following command: `python falcon_data_replicator.py`
 
 ### 4. Validation
 
