@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Parameters:
+  BucketName:
+    Type: String
+    Description: The name of the S3 bucket to be used for the Security Hub custom source.
+  RoleName:
+    Type: String
+    Description: The name of the IAM role to be created.
+    Default: CrowdStrike-AmazonSecurityLake-CustomSourceRole
+  ExternalId:
+    Type: String
+    Description: The external ID to be used for the IAM role.
+    Default: CrowdStrikeCustomSource
+  AccountId:
+    Type: String
+    Description: The AWS account ID where FDR github tool is deployed.
+Resources:
+  IAMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Ref RoleName
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: '1'
+            Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AccountId}:root'
+            Action: 'sts:AssumeRole'
+            Condition:
+              StringEquals:
+                'sts:ExternalId': !Ref ExternalId
+      PermissionsBoundary: arn:aws:iam::aws:policy/AmazonSecurityLakePermissionsBoundary
+      Policies:
+        - PolicyName: InlinePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: '1'
+                Effect: Allow
+                Action:
+                  - 's3:PutObject'
+                  - 's3:GetObject'
+                  - 's3:PutObjectAcl'
+                Resource: !Sub 'arn:aws:s3:::${BucketName}/ext/*'
+              - Sid: '2'
+                Effect: Allow
+                Action:
+                  - 's3:GetBucketLocation'
+                  - 's3:ListBucket'
+                Resource:
+                  - !Sub 'arn:aws:s3:::${BucketName}'
+                  - !Sub 'arn:aws:s3:::${BucketName}/*'

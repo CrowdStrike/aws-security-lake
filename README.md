@@ -8,20 +8,22 @@
 
 ## Table of Contents
 
-- [Overview](#overview)
-  - [What is Falcon Data Replicator](#what-is-falcon-data-replicator)
-  - [What is Amazon Security Lake](#what-is-amazon-security-lake)
-  - [Integration overview](#integration-overview)
-  - [Prerequisites](#prerequisites)
-- [Integration guide](#integration-guide)
-  - [1. Setup Falcon Data Replicator (FDR)](#1-setup-falcon-data-replicator-fdr)
-  - [2. Setting up CrowdStrike as a Amazon Security Lake Provider](#2-setting-up-crowdstrike-as-a-amazon-security-lake-provider)
-    - [2.1 Deploy IAM Roles](#21-deploy-iam-roles)
-    - [2.2 Register CrowdStrike as custom source provider](#22-register-crowdstrike-as-custom-source-provider)
-  - [3. Configuring and running the Falcon Data Replicator application](#3-configuring-and-running-the-falcon-data-replicator-application)
-  - [4. Validation](#4-validation)
-- [Support](#support)
-- [References](#references)
+- [CrowdStrike Falcon Data Replicator and Amazon Security Lake Integration Guide](#crowdstrike-falcon-data-replicator-and-amazon-security-lake-integration-guide)
+  - [Table of Contents](#table-of-contents)
+  - [Overview](#overview)
+    - [What is Falcon Data Replicator](#what-is-falcon-data-replicator)
+    - [What is Amazon Security Lake](#what-is-amazon-security-lake)
+    - [Integration overview](#integration-overview)
+    - [Prerequisites](#prerequisites)
+  - [Integration guide](#integration-guide)
+    - [1. Setup Falcon Data Replicator (FDR)](#1-setup-falcon-data-replicator-fdr)
+    - [2. Setting up CrowdStrike as a Amazon Security Lake Provider](#2-setting-up-crowdstrike-as-a-amazon-security-lake-provider)
+      - [2.1 Deploy IAM Roles](#21-deploy-iam-roles)
+      - [2.2 Register CrowdStrike as custom source provider](#22-register-crowdstrike-as-custom-source-provider)
+    - [3. Configuring and running the Falcon Data Replicator application](#3-configuring-and-running-the-falcon-data-replicator-application)
+    - [4. Validation](#4-validation)
+  - [Support](#support)
+  - [References](#references)
 
 ## Overview
 
@@ -52,6 +54,7 @@ While FDR data encompasses a large amount of events, only certain events are app
 
 ### Prerequisites
 
+- AWS CLI version greater than `2.11.24`
 - You must be a customer of CrowdStrike Insights XDR and Falcon Data Replicator
 - Contact your CrowdStrike account manager to obtain the FDR OCSF mapping files
 - Contact your CrowdStrike account manager to start using FDR
@@ -85,8 +88,11 @@ Please follow AWS's guidance on creating an IAM role that allows Security Lake t
 
 In this step, you'll run a script that will register CrowdStrike sources for each supported OCSF Event Class with Amazon Security Lake.
 
+This script will also create an IAM role that will be used to write data to your Amazon Security Lake bucket.
+
 1. From the root of this project's directory, run the following script: `sh ./infrastructure/create_crowdstrike_sources.sh`
    1. When prompted for the `ARN of IAM Role that has permissions to Invoke Glue`, use the ARN from 2.1
+   1. When prompted for the `S3 Bucket name to write source to` use the name of the security lake bucket you received from Amazon Security Lake. Use the bucket for the region you are writing to. The name can be found by going to `Security Lake > Regions` and clicking on the `location` for your target region. This will take you to the bucket's page where you can copy the name.
 
 ### 3. Configuring and running the Falcon Data Replicator application
 
@@ -108,6 +114,8 @@ In this step, you'll configure and run a script that reads files written to your
       1. `TARGET_BUCKET`={{ Replace with value you received from Amazon Security Lake }}
       1. `TARGET_REGION`={{ Replace with value you received from Amazon Security Lake }}
       1. `DO_OCSF_CONVERSION`=yes
+      1. `OCSF_ROLE_NAME`={{ Replace with name of the role created from the CFT in step 2.2. Default is `CrowdStrike-AmazonSecurityLake-CustomSourceRole` }}
+      1. `OCSF_ROLE_EXTERNAL_ID`={{ Replace with value from step 2.2. Default is `CrowdStrikeCustomSource` }}
 1. Run the application in the same account where your Amazon Security Lake master is configured by issuing the following command: `python falcon_data_replicator.py`
 
 ### 4. Validation
