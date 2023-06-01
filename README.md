@@ -88,7 +88,7 @@ Please follow AWS's guidance on creating an IAM role that allows Security Lake t
 
 In this step, you'll run a script that will register CrowdStrike sources for each supported OCSF Event Class with Amazon Security Lake.
 
-This script will also create a IAM role that will be used later to write data to your Amazon Security Lake bucket.
+This script will also create an IAM role that will be used to write data to your Amazon Security Lake bucket.
 
 1. From the root of this project's directory, run the following script: `sh ./infrastructure/create_crowdstrike_sources.sh`
    1. When prompted for the `ARN of IAM Role that has permissions to Invoke Glue`, use the ARN from 2.1
