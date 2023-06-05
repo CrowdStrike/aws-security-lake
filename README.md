@@ -18,7 +18,7 @@
   - [Integration guide](#integration-guide)
     - [1. Setup Falcon Data Replicator (FDR)](#1-setup-falcon-data-replicator-fdr)
     - [2. Setting up CrowdStrike as a Amazon Security Lake Provider](#2-setting-up-crowdstrike-as-a-amazon-security-lake-provider)
-      - [2.1 Create Glu IAM Roles](#21-create-glu-iam-roles)
+      - [2.1 Create Glue IAM Roles](#21-create-glue-iam-roles)
       - [2.2 Register CrowdStrike as custom source provider](#22-register-crowdstrike-as-custom-source-provider)
       - [2.3 Create Custom Resource Write Role](#23-create-custom-resource-write-role)
     - [3. Configuring and running the Falcon Data Replicator application](#3-configuring-and-running-the-falcon-data-replicator-application)
@@ -80,7 +80,7 @@ In this step, you'll set up the required resources for CrowdStrike to be registe
 
 **Execute the instructions below in your master Amazon Security Lake account.**
 
-#### 2.1 Create Glu IAM Roles
+#### 2.1 Create Glue IAM Roles
 
 Please follow AWS's guidance on creating an IAM role that allows Security Lake to interact with custom sources: [Prerequisite: Create IAM role before adding custom sources](https://docs.aws.amazon.com/security-lake/latest/userguide/custom-sources.html). If you've already created the IAM role, record the ARN as you'll need it for the next step.
 
