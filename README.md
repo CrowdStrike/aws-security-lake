@@ -98,7 +98,7 @@ This script will also create an IAM role that will be used to write data to your
 
   The Falcon Data Replicator (FDR) application will write data to your Amazon Security Lake bucket. To do this, you'll need to create an IAM role with the least amount of permissions and has the correct ExternalId. This repo contains a CloudFormation template that will create the role for you.
 
-  Use the `./infrastructure/iam_role.yaml` CloudFormation template to create the role.
+  The template is located here: `./infrastructure/iam_role.yaml` and has the following parameters:
 
   | Parameter | Description | Required | Default |
   | --------- | ----------- | -------- | ------- |
