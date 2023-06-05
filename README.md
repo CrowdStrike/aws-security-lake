@@ -18,8 +18,9 @@
   - [Integration guide](#integration-guide)
     - [1. Setup Falcon Data Replicator (FDR)](#1-setup-falcon-data-replicator-fdr)
     - [2. Setting up CrowdStrike as a Amazon Security Lake Provider](#2-setting-up-crowdstrike-as-a-amazon-security-lake-provider)
-      - [2.1 Deploy IAM Roles](#21-deploy-iam-roles)
+      - [2.1 Create Glu IAM Roles](#21-create-glu-iam-roles)
       - [2.2 Register CrowdStrike as custom source provider](#22-register-crowdstrike-as-custom-source-provider)
+      - [2.3 Create Custom Resource Write Role](#23-create-custom-resource-write-role)
     - [3. Configuring and running the Falcon Data Replicator application](#3-configuring-and-running-the-falcon-data-replicator-application)
     - [4. Validation](#4-validation)
   - [Support](#support)
@@ -79,10 +80,9 @@ In this step, you'll set up the required resources for CrowdStrike to be registe
 
 **Execute the instructions below in your master Amazon Security Lake account.**
 
-#### 2.1 Deploy IAM Roles
+#### 2.1 Create Glu IAM Roles
 
-Please follow AWS's guidance on creating an IAM role that allows Security Lake to interact with custom sources: [Prerequisite: Create IAM role before adding custom sources](https://docs.aws.amazon.com/security-lake/latest/userguide/custom-sources.html). If you've already created the IAM role, record the ARN as you'll need it for the next step
-
+Please follow AWS's guidance on creating an IAM role that allows Security Lake to interact with custom sources: [Prerequisite: Create IAM role before adding custom sources](https://docs.aws.amazon.com/security-lake/latest/userguide/custom-sources.html). If you've already created the IAM role, record the ARN as you'll need it for the next step.
 
 #### 2.2 Register CrowdStrike as custom source provider
 
@@ -92,8 +92,20 @@ This script will also create an IAM role that will be used to write data to your
 
 1. From the root of this project's directory, run the following script: `sh ./infrastructure/create_crowdstrike_sources.sh`
    1. When prompted for the `ARN of IAM Role that has permissions to Invoke Glue`, use the ARN from 2.1
-   1. When prompted for the `S3 Bucket name to write source to` use the name of the security lake bucket you received from Amazon Security Lake. Use the bucket for the region you are writing to. The name can be found by going to `Security Lake > Regions` and clicking on the `location` for your target region. This will take you to the bucket's page where you can copy the name.
 
+
+#### 2.3 Create Custom Resource Write Role
+
+  The Falcon Data Replicator (FDR) application will write data to your Amazon Security Lake bucket. To do this, you'll need to create an IAM role with the least amount of permissions and has the correct ExternalId. This repo contains a CloudFormation template that will create the role for you.
+
+  Use the `./infrastructure/iam_role.yaml` CloudFormation template to create the role.
+
+  | Parameter | Description | Required | Default |
+  | --------- | ----------- | -------- | ------- |
+  | BucketName | The name of the S3 bucket to write data to. Use the bucket in the same region you created the custom sources. You can find the buckets used by security lake by going to `Security Lake > Regions` | Yes | N/A |
+  | AccountId | The AWS account ID where the FDR github tool will be deployed. | Yes | N/A |
+  | RoleName | The name of the role to create. | No | `CrowdStrike-AmazonSecurityLake-CustomSourceRole` |
+  | ExternalId | The External ID to use for the role. This is used to prevent privilege escalation. Use the same External ID you used in step 2.2 | No | `CrowdStrikeCustomSource` |
 ### 3. Configuring and running the Falcon Data Replicator application
 
 In this step, you'll configure and run a script that reads files written to your FDR bucket, transforms it to OSFC schema, and loads it into Amazon Security Lake.
@@ -114,8 +126,8 @@ In this step, you'll configure and run a script that reads files written to your
       1. `TARGET_BUCKET`={{ Replace with value you received from Amazon Security Lake }}
       1. `TARGET_REGION`={{ Replace with value you received from Amazon Security Lake }}
       1. `DO_OCSF_CONVERSION`=yes
-      1. `OCSF_ROLE_NAME`={{ Replace with name of the role created from the CFT in step 2.2. Default is `CrowdStrike-AmazonSecurityLake-CustomSourceRole` }}
-      1. `OCSF_ROLE_EXTERNAL_ID`={{ Replace with value from step 2.2. Default is `CrowdStrikeCustomSource` }}
+      1. `OCSF_ROLE_NAME`={{ Replace with name of the role created from the CFT in step 2.3. Default is `CrowdStrike-AmazonSecurityLake-CustomSourceRole` }}
+      1. `OCSF_ROLE_EXTERNAL_ID`={{ Replace with value from step 2.3. Default is `CrowdStrikeCustomSource` }}
 1. Run the application in the same account where your Amazon Security Lake master is configured by issuing the following command: `python falcon_data_replicator.py`
 
 ### 4. Validation

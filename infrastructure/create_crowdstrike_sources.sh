@@ -14,12 +14,19 @@ SUPPORTED_OCSF_CLASSES=(
 SECURITY_LAKE_REGION=
 GLI_ARN=
 ACCOUNT_ID=
+ROLE_EXTERNALID="CrowdStrikeCustomSource"
 
 # jq is required
 if ! command -v jq &> /dev/null
 then
     echo "[X] jq is not installed. Please install it before running this script"
     exit 1
+fi
+
+if [[ -z "${EXTERNALID}" ]]; then
+    echo "Using default external ID: ${ROLE_EXTERNALID} (set EXTERNALID env var to override)"
+else
+    ROLE_EXTERNALID="${EXTERNALID}"
 fi
 
 # Check if we have a "AWS region" set in an environment variable before prompting...
@@ -67,7 +74,7 @@ for klass in ${SUPPORTED_OCSF_CLASSES[@]}; do
 
     echo "[+] Creating ${source_name}..."
     aws securitylake create-custom-log-source \
-        --configuration "{\"crawlerConfiguration\":{\"roleArn\":\"$GLI_ARN\"},\"providerIdentity\":{\"externalId\":\"$CFT_EXTERNALID\",\"principal\":\"$ACCOUNT_ID\"}}" \
+        --configuration "{\"crawlerConfiguration\":{\"roleArn\":\"$GLI_ARN\"},\"providerIdentity\":{\"externalId\":\"$ROLE_EXTERNALID\",\"principal\":\"$ACCOUNT_ID\"}}" \
         --event-classes "[\"$klass\"]" \
         --source-name ${source_name} \
         --region ${SECURITY_LAKE_REGION}
